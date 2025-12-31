@@ -6,25 +6,25 @@
 }
 
 :root {
-  --background: #050505 !important;
-  --foreground: #f0f0f0 !important;
-  --card: #121212;
-  --card-foreground: #ffffff;
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
   --primary: #8b5cf6;
   --primary-foreground: #ffffff;
-  --secondary: #1f1f1f;
-  --secondary-foreground: #a1a1aa;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #64748b;
   --accent: #3b82f6;
   --accent-foreground: #ffffff;
-  --border: #27272a;
-  --input: #18181b;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
   --ring: #8b5cf6;
-  color-scheme: dark !important;
+  color-scheme: light;
 }
 
 body {
-  background-color: #050505 !important;
-  color: #f0f0f0 !important;
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -32,12 +32,12 @@ body {
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .chat-gradient {
-  background: radial-gradient(circle at top center, rgba(139, 92, 246, 0.15) 0%, transparent 80%);
+  background: radial-gradient(circle at top center, rgba(139, 92, 246, 0.08) 0%, transparent 80%);
 }

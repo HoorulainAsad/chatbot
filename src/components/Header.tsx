@@ -11,14 +11,14 @@ export default function Header() {
                     <UserButton
                         appearance={{
                             elements: {
-                                userButtonAvatarBox: 'w-10 h-10 border-2 border-white/20 shadow-lg'
+                                userButtonAvatarBox: 'w-10 h-10 border-2 border-gray-200 shadow-lg'
                             }
                         }}
                     />
                 </SignedIn>
                 <SignedOut>
                     <SignInButton mode="modal">
-                        <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white font-semibold text-sm rounded-xl hover:opacity-90 transition-all shadow-lg shadow-violet-500/30 active:scale-95">
+                        <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-blue-600 text-white font-semibold text-sm rounded-xl hover:opacity-90 transition-all shadow-lg shadow-violet-300/50 active:scale-95">
                             <LogIn className="w-4 h-4" />
                             Sign In
                         </button>

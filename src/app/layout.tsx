@@ -27,8 +27,8 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en" className="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased chat-gradient min-h-screen bg-[#050505] text-white flex`} suppressHydrationWarning>
+      <html lang="en" className="light" style={{ colorScheme: 'light' }} suppressHydrationWarning>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased chat-gradient min-h-screen bg-[#f8fafc] text-slate-800 flex`} suppressHydrationWarning>
           <Sidebar />
           <Header />
           <main className="flex-1 lg:pl-72 pt-4 pb-4 px-6 max-w-6xl mx-auto h-[100dvh] flex flex-col w-full">

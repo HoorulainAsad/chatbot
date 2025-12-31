@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, Bot, Loader2 } from 'lucide-react';
+import { Send, User, Bot } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -17,14 +17,13 @@ type Message = {
     id: string;
     role: 'user' | 'assistant';
     content: string;
-    parts?: any[]; // Keep for compatibility if needed, though we primarily use content string now
+    parts?: any[];
 };
 
 export default function Chat() {
     const searchParams = useSearchParams();
     const urlChatId = searchParams.get('chatId');
 
-    // Manual State Management
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -33,9 +32,8 @@ export default function Chat() {
 
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const { isLoaded: userLoaded, isSignedIn } = useUser();
+    const { isLoaded: userLoaded } = useUser();
 
-    // Load messages if chatId is present in URL
     useEffect(() => {
         if (!userLoaded) return;
 
@@ -69,7 +67,7 @@ export default function Chat() {
             }
         } catch (err: any) {
             if (err.name === 'AbortError') {
-                console.error("LOG: Chat - Fetch timed out after 8s");
+                console.log("LOG: Chat - Request aborted");
             } else {
                 console.error("LOG: Chat - Failed to fetch messages:", err);
             }
@@ -95,20 +93,18 @@ export default function Chat() {
             content: localInput
         };
 
-        // 1. Update UI immediately with user message
         setMessages(prev => [...prev, userMsg]);
         setLocalInput('');
         setIsLoading(true);
         setError(null);
 
         try {
-            // 2. Prepare API call
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: [...messages, userMsg], // Send history + new message
-                    chatId: chatId // Include chatId for database persistence
+                    messages: [...messages, userMsg],
+                    chatId: chatId
                 })
             });
 
@@ -119,15 +115,13 @@ export default function Chat() {
                     const errorData = await response.json();
                     errorDetail = errorData.details || errorData.error || "No specific details provided.";
                 } catch (e) {
-                    errorDetail = "The server returned an invalid response (not JSON). This often means a crash or timeout.";
+                    errorDetail = "The server returned an invalid response.";
                 }
                 throw new Error(`${errorTitle}: ${errorDetail}`);
             }
 
-            // 3. Create placeholder for assistant response
-            const assistantMsgId = (Date.now() + 1).toString();
-            // 4. For non-streaming debug, wait for JSON
             const data = await response.json();
+            const assistantMsgId = (Date.now() + 1).toString();
 
             setMessages(prev => [...prev, {
                 id: assistantMsgId,
@@ -135,17 +129,9 @@ export default function Chat() {
                 content: data.text
             }]);
 
-            // Streaming logic commented out for debugging
-            /*
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            // ... (rest of streaming logic)
-            */
-
         } catch (err: any) {
             console.error("Chat submission error:", err);
             setError(err);
-            // Verify the last message wasn't the user's before adding error feedback logic if needed or just let the global error show
         } finally {
             setIsLoading(false);
         }
@@ -153,24 +139,24 @@ export default function Chat() {
 
 
     return (
-        <div className="flex-1 flex flex-col overflow-hidden glass rounded-3xl relative border border-white/10 shadow-2xl">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white rounded-3xl relative border border-gray-200 shadow-xl">
             {/* Messages Area */}
             <div
                 ref={scrollRef}
-                className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+                className="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-300"
             >
                 {!messages || messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-80">
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-violet-600/20 to-blue-600/20 flex items-center justify-center border border-white/10 shadow-2xl"
+                            className="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-violet-100 to-blue-100 flex items-center justify-center border border-violet-200 shadow-xl"
                         >
-                            <Bot className="w-10 h-10 text-primary" />
+                            <Bot className="w-10 h-10 text-violet-600" />
                         </motion.div>
                         <div className="space-y-2">
-                            <h2 className="text-3xl font-bold tracking-tight text-white">Chatbot Elite</h2>
-                            <p className="max-w-xs text-sm text-gray-400">Your premium AI assistant is ready. How can I assist you today?</p>
+                            <h2 className="text-3xl font-bold tracking-tight text-slate-800">Chatbot Elite</h2>
+                            <p className="max-w-xs text-sm text-gray-500">Your premium AI assistant is ready. How can I assist you today?</p>
                         </div>
                     </div>
                 ) : (
@@ -187,17 +173,16 @@ export default function Chat() {
                             >
                                 <div className={cn(
                                     "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-lg transition-transform hover:scale-105",
-                                    m.role === 'user' ? "bg-primary text-white" : "bg-white/10 border border-white/10"
+                                    m.role === 'user' ? "bg-gradient-to-br from-violet-600 to-blue-600 text-white" : "bg-gray-100 border border-gray-200"
                                 )}>
-                                    {m.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+                                    {m.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5 text-violet-600" />}
                                 </div>
                                 <div className={cn(
-                                    "px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed whitespace-pre-wrap shadow-xl",
+                                    "px-5 py-3.5 rounded-2xl text-[15px] leading-relaxed whitespace-pre-wrap shadow-md",
                                     m.role === 'user'
-                                        ? "bg-primary text-primary-foreground font-medium"
-                                        : "bg-[#18181b]/80 border border-white/10 text-gray-200 backdrop-blur-sm"
+                                        ? "bg-gradient-to-br from-violet-600 to-blue-600 text-white font-medium"
+                                        : "bg-gray-50 border border-gray-200 text-slate-700"
                                 )}>
-                                    {/* Handle content */}
                                     {m.content}
                                 </div>
                             </motion.div>
@@ -206,26 +191,26 @@ export default function Chat() {
                 )}
                 {isLoading && (
                     <div className="flex gap-4 max-w-[85%] mr-auto">
-                        <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center border border-white/10 shadow-lg">
-                            <Bot className="w-5 h-5" />
+                        <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center border border-gray-200 shadow-lg">
+                            <Bot className="w-5 h-5 text-violet-600" />
                         </div>
-                        <div className="px-5 py-3.5 rounded-2xl bg-[#18181b]/80 border border-white/10 flex items-center gap-3 shadow-xl backdrop-blur-sm">
+                        <div className="px-5 py-3.5 rounded-2xl bg-gray-50 border border-gray-200 flex items-center gap-3 shadow-md">
                             <div className="flex gap-1">
-                                <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce"></span>
+                                <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                <span className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce"></span>
                             </div>
-                            <span className="text-xs text-gray-400 font-bold uppercase tracking-widest italic pt-0.5">Elite Intelligence</span>
+                            <span className="text-xs text-gray-500 font-bold uppercase tracking-widest italic pt-0.5">Elite Intelligence</span>
                         </div>
                     </div>
                 )}
                 {error && (
                     <div className="flex gap-4 max-w-[85%] mr-auto">
-                        <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20 shadow-lg">
-                            <Bot className="w-5 h-5 text-red-400" />
+                        <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center border border-red-200 shadow-lg">
+                            <Bot className="w-5 h-5 text-red-500" />
                         </div>
-                        <div className="px-5 py-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-200 backdrop-blur-sm shadow-xl">
-                            <div className="font-semibold mb-1 text-red-400 text-xs uppercase tracking-wider">System Error</div>
+                        <div className="px-5 py-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 shadow-md">
+                            <div className="font-semibold mb-1 text-red-500 text-xs uppercase tracking-wider">System Error</div>
                             {error.message || "An unexpected error occurred. Please try again."}
                         </div>
                     </div>
@@ -233,13 +218,13 @@ export default function Chat() {
             </div>
 
             {/* Input Area */}
-            <div className="p-5 bg-black/80 backdrop-blur-3xl border-t border-white/10 relative z-10">
+            <div className="p-5 bg-gray-50 border-t border-gray-200 relative z-10">
                 <form
                     onSubmit={onSubmit}
                     className="relative flex items-center gap-2 max-w-4xl mx-auto"
                 >
                     <input
-                        className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 pr-14 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-gray-400 text-sm text-white shadow-inner"
+                        className="flex-1 bg-white border border-gray-200 rounded-2xl px-6 py-4 pr-14 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 transition-all placeholder:text-gray-400 text-sm text-slate-700 shadow-sm"
                         value={localInput}
                         placeholder="Deep thinking enabled. Message Elite..."
                         onChange={(e) => setLocalInput(e.target.value)}
@@ -247,17 +232,17 @@ export default function Chat() {
                     <button
                         type="submit"
                         disabled={isLoading || !localInput?.trim()}
-                        className="absolute right-2 p-2.5 bg-primary text-white rounded-xl hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 shadow-lg shadow-primary/30"
+                        className="absolute right-2 p-2.5 bg-gradient-to-br from-violet-600 to-blue-600 text-white rounded-xl hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-90 shadow-lg"
                     >
                         <Send className="w-5 h-5" />
                     </button>
                 </form>
                 <div className="flex items-center justify-center gap-4 mt-4 opacity-40 select-none">
-                    <div className="h-[1px] w-12 bg-gray-700"></div>
-                    <p className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-500 italic">
+                    <div className="h-[1px] w-12 bg-gray-300"></div>
+                    <p className="text-[9px] uppercase tracking-[0.3em] font-black text-gray-400 italic">
                         Gemini 1.5 Flash • v2.0.0
                     </p>
-                    <div className="h-[1px] w-12 bg-gray-700"></div>
+                    <div className="h-[1px] w-12 bg-gray-300"></div>
                 </div>
             </div>
         </div>
