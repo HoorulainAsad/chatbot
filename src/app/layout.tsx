@@ -20,13 +20,19 @@ export const metadata: Metadata = {
   description: 'Experience the next generation of AI conversations',
 }
 
+const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey && process.env.NODE_ENV === 'production') {
+  console.warn("WARNING: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not defined.");
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
+    <ClerkProvider publishableKey={publishableKey}>
       <html lang="en" className="light" style={{ colorScheme: 'light' }} suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased chat-gradient min-h-screen bg-[#f8fafc] text-slate-800 flex`} suppressHydrationWarning>
           <Sidebar />
